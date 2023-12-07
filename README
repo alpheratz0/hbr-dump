@@ -2,3 +2,8 @@ hbrdump lets you dump messages & stadiums from an .hbr file.
 
 ./hbrdump -messages path/to/my/replay.hbr
 ./hbrdump -stadiums path/to/my/replay.hbr
+
+inspired by:
+
+https://github.com/jonnyynnoj/haxball-replay-parser
+https://github.com/ivanfeli/HaxballParser

@@ -52,6 +52,7 @@ static uint32_t hb_stream_reader_color(struct hb_stream_reader *s)
 static double hb_stream_reader_curve(struct hb_stream_reader *s)
 {
 	double curve_f = hb_stream_reader_double(s);
+	if (isnan(curve_f)) curve_f = INFINITY;
 	if (curve_f == 0.0) return 180.0;
 	return fmod(((atan(1 / curve_f) * 360.0) / M_PI) + 360.0, 360.0);
 }

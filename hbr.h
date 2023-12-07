@@ -35,7 +35,7 @@ extern "C" {
 
 struct hb_player {
 	uint32_t id;
-	char name[255];
+	char name[128];
 	bool is_admin;
 	enum hb_team team;
 	uint8_t number;

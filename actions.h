@@ -52,7 +52,7 @@ struct hb_action_player_join {
 	uint32_t by_player;
 	uint8_t type;
 	uint32_t id;
-	char name[256];
+	char name[128];
 	bool is_admin;
 	char country[5];
 };

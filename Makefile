@@ -7,10 +7,10 @@ OBJ=\
 	stream_reader.o \
 	main.o
 
-all: hbr-dump
+all: hbrdump
 
-hbr-dump: $(OBJ)
-	cc *.o -o hbr-dump -lz -lhb -ljq -lm -O2
+hbrdump: $(OBJ)
+	cc *.o -o hbrdump -lz -lhb -ljq -lm -O2
 
 clean:
-	rm -f *.o hbr-dump
+	rm -f *.o hbrdump

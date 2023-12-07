@@ -1,0 +1,4 @@
+hbr-dump lets you dump messages & stadiums from an .hbr file.
+
+./hbr-dump -messages path/to/my/replay.hbr
+./hbr-dump -stadiums path/to/my/replay.hbr

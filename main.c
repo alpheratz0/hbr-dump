@@ -20,6 +20,9 @@
 #include "actions.h"
 #include "hbr.h"
 
+// Comment this if you dont want the stadiums to be storables.
+#define HBR_DUMP_MAKE_STADIUMS_STORABLES
+
 static enum { DumpMessages, DumpStadiums } mode = DumpMessages;
 
 static void hb_player_list_add(struct hb_player_list *player_list,
@@ -142,6 +145,9 @@ static void on_game_paused(struct hb_hbr *hbr, struct hb_action_pause_resume_gam
 
 static void save_stadium(struct hb_stadium *stadium)
 {
+#ifdef HBR_DUMP_MAKE_STADIUMS_STORABLES
+	stadium->can_be_stored = true;
+#endif
 	char *hbs_data = hb_stadium_to_str(stadium);
 	char filename[256];
 	snprintf(filename, sizeof(filename), "%05d.hbs", rand() % 100000);

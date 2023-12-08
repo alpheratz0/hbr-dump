@@ -34,6 +34,7 @@
 
 static enum hb_team hb_stream_reader_team(struct hb_stream_reader *s)
 {
+	// FIXME: this is not ok, seems like team id is parsed in different ways
 	switch (hb_stream_reader_uint8(s)) {
 	case 0:  return HB_TEAM_BLUE;
 	case 1:  return HB_TEAM_RED;

@@ -408,7 +408,7 @@ static void parse_event_set_team_shirt(struct hb_stream_reader *s, struct hb_eve
 {
 	ev->set_team_shirt.team = hb_stream_reader_team(s);
 	ev->set_team_shirt.shirt.num_colors = (size_t) hb_stream_reader_uint8(s);
-	assert(ev->set_team_shirt.shirt.num_colors <= 3 && ev->set_team_shirt.shirt.num_colors > 0);
+	assert(ev->set_team_shirt.shirt.num_colors <= 3);
 	for (size_t i = 0; i < ev->set_team_shirt.shirt.num_colors; ++i)
 		ev->set_team_shirt.shirt.colors[i] = hb_stream_reader_uint32(s);
 	ev->set_team_shirt.shirt.angle = (double) hb_stream_reader_uint16(s);

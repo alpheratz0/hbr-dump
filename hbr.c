@@ -47,7 +47,7 @@ static uint32_t hb_stream_reader_color(struct hb_stream_reader *s)
 {
 	uint32_t color = hb_stream_reader_uint32(s);
 	if (color == 0xffffffff) color = 0x00000000;
-	else color |= 0xff << 24;
+	else color |= 0xfful << 24;
 	return color;
 }
 

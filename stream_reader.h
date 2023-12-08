@@ -24,13 +24,13 @@
 
 struct hb_stream_reader {
 	uint8_t *data;
-	size_t len;
-	size_t offset;
+	size_t len, offset;
 };
 
 struct hb_stream_reader *hb_stream_reader_new(size_t len);
 struct hb_stream_reader *hb_stream_reader_from_file(const char *path);
-struct hb_stream_reader *hb_stream_reader_slice(struct hb_stream_reader *s, size_t len);
+struct hb_stream_reader *hb_stream_reader_slice(struct hb_stream_reader *s,
+		size_t len);
 
 int8_t      hb_stream_reader_int8(struct hb_stream_reader *s);
 uint8_t    hb_stream_reader_uint8(struct hb_stream_reader *s);
@@ -43,10 +43,7 @@ double    hb_stream_reader_double(struct hb_stream_reader *s);
 bool        hb_stream_reader_bool(struct hb_stream_reader *s);
 
 void hb_stream_reader_string_ascii(struct hb_stream_reader *s,
-                                   uint32_t len,
-                                   size_t cap,
-                                   char *str);
+		uint32_t len, size_t cap, char *str);
 
 void hb_stream_reader_inflate(struct hb_stream_reader *s, bool raw);
-
 void hb_stream_reader_free(struct hb_stream_reader *s);

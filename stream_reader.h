@@ -18,10 +18,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define hb_stream_reader_string_ascii_auto(stream, str) \
 	hb_stream_reader_string_ascii(stream, hb_stream_reader_uint16(stream), \
 			sizeof(str), &str[0])
@@ -54,7 +50,3 @@ void hb_stream_reader_string_ascii(struct hb_stream_reader *s,
 void hb_stream_reader_inflate(struct hb_stream_reader *s, bool raw);
 
 void hb_stream_reader_free(struct hb_stream_reader *s);
-
-#ifdef __cplusplus
-}
-#endif

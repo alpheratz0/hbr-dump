@@ -23,10 +23,6 @@
 #include "stream_reader.h"
 #include "actions.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define HBR_MAGIC (0x48425250)
 #define HBR_MIN_VERSION (7)
 #define HBR_MAX_VERSION (12)
@@ -82,7 +78,3 @@ struct hb_hbr {
 struct hb_hbr *hb_hbr_parse(const char *path);
 struct hb_action_generic *hb_hbr_next_action(struct hb_hbr *hbr);
 void hb_hbr_free(struct hb_hbr *hbr);
-
-#ifdef __cplusplus
-}
-#endif

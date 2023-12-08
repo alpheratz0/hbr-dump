@@ -18,10 +18,6 @@
 #include <hb/team.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 enum hb_replay_action_kind {
 	HB_REPLAY_ACTION_PLAYER_JOIN = 0,
 	HB_REPLAY_ACTION_PLAYER_LEAVE = 1,
@@ -168,7 +164,3 @@ struct hb_action_set_team_colors {
 };
 
 void hb_action_free(struct hb_action_generic *action);
-
-#ifdef __cplusplus
-}
-#endif

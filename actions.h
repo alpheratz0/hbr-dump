@@ -39,126 +39,113 @@ enum hb_replay_action_kind {
 	HB_REPLAY_ACTION_SET_TEAM_COLORS = 17
 };
 
-struct hb_action_generic {
-	uint32_t by_player;
+#define HB_ACTION_GENERIC_PROPS() \
+	uint32_t by_player; \
 	uint8_t type;
+
+struct hb_action_generic {
+	HB_ACTION_GENERIC_PROPS();
 };
 
 struct hb_action_player_join {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint32_t id;
-	char name[128];
+	char name[128], country[5];
 	bool is_admin;
-	char country[5];
 };
 
 struct hb_action_player_leave {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint16_t id;
-	bool kicked;
+	bool kicked, ban;
 	char reason[256];
-	bool ban;
 };
 
 struct hb_action_player_chat {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	char message[256];
 };
 
 struct hb_action_logic_update {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
+	/* No data */
 };
 
 struct hb_action_start_match {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
+	/* No data */
 };
 
 struct hb_action_stop_match {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
+	/* No data */
 };
 
 struct hb_action_set_player_input {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint8_t input;
 };
 
 struct hb_action_set_player_team {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint32_t id;
 	enum hb_team team;
 };
 
 struct hb_action_set_teams_lock {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	bool teams_lock;
 };
 
 struct hb_action_set_game_setting {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint8_t setting_id;
 	uint32_t setting_value;
 };
 
 struct hb_action_set_player_avatar {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	char avatar[10];
 };
 
 struct hb_action_set_player_desync {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
+	/* No data */
 };
 
 struct hb_action_set_player_admin {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint32_t id;
 	bool is_admin;
 };
 
 struct hb_action_set_stadium {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	const char *default_stadium;
 	struct hb_stadium stadium;
 };
 
 struct hb_action_pause_resume_game {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	bool paused;
 };
 
 struct hb_action_ping_update {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint8_t ping_count;
 	uint32_t pings[255];
 };
 
 struct hb_action_set_player_handicap {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	uint16_t handicap;
 };
 
 struct hb_action_set_team_colors {
-	uint32_t by_player;
-	uint8_t type;
+	HB_ACTION_GENERIC_PROPS();
 	enum hb_team team;
-	uint32_t avatar_color;
 	uint16_t angle;
+	uint32_t avatar_color;
 	uint8_t num_stripes;
 	uint32_t stripes[3];
 };

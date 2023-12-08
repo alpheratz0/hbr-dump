@@ -16,6 +16,7 @@
 
 #include <hb/stadium.h>
 #include <hb/team.h>
+#include <hb/shirt.h>
 #include <stdint.h>
 
 enum hb_event_kind
@@ -37,10 +38,11 @@ enum hb_event_kind
 	HB_EVENT_PAUSE_RESUME_GAME   =   14,
 	HB_EVENT_PING_UPDATE         =   15,
 	HB_EVENT_SET_PLAYER_HANDICAP =   16,
-	HB_EVENT_SET_TEAM_COLORS     =   17
+	HB_EVENT_SET_TEAM_SHIRT      =   17
 };
 
-struct hb_event {
+struct hb_event
+{
 	uint32_t by_player;
 	uint8_t type;
 	union {
@@ -57,6 +59,6 @@ struct hb_event {
 		struct hb_event_pause_resume_game { bool paused; } pause_resume_game;
 		struct hb_event_ping_update { uint8_t ping_count; uint32_t pings[255]; } ping_update;
 		struct hb_event_set_player_handicap { uint16_t handicap; } set_player_handicap;
-		struct hb_event_set_team_colors { enum hb_team team; struct hb_shirt shirt; } set_team_colors;
+		struct hb_event_set_team_shirt { enum hb_team team; struct hb_shirt shirt; } set_team_shirt;
 	};
 };

@@ -21,7 +21,7 @@
 #include "events.h"
 #include "hbr.h"
 
-// Comment this if you dont want the stadiums to be storables.
+// Comment this if you dont want the stadiums to be storable.
 #define HBR_DUMP_MAKE_STADIUMS_STORABLES
 
 static enum { DumpMessages, DumpStadiums } mode = DumpMessages;

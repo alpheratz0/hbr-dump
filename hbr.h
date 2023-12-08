@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 #include "stream_reader.h"
-#include "actions.h"
+#include "events.h"
 
 #define HBR_MAGIC (0x48425250)
 #define HBR_MIN_VERSION (7)
@@ -76,5 +76,5 @@ struct hb_hbr {
 };
 
 struct hb_hbr *hb_hbr_parse(const char *path);
-struct hb_action_generic *hb_hbr_next_action(struct hb_hbr *hbr);
+int hb_hbr_next_event(struct hb_hbr *hbr, struct hb_event *ev);
 void hb_hbr_free(struct hb_hbr *hbr);

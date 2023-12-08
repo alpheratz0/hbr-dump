@@ -29,7 +29,7 @@
 #include <hb/shirt.h>
 #include <hb/stadium.h>
 #include "stream_reader.h"
-#include "actions.h"
+#include "events.h"
 #include "hbr.h"
 
 static enum hb_team hb_stream_reader_team(struct hb_stream_reader *s)
@@ -167,7 +167,7 @@ static void hb_stream_reader_player(struct hb_stream_reader *s,
 }
 
 
-static struct hb_shirt hb_stream_reader_team_colors(struct hb_stream_reader *s)
+static struct hb_shirt hb_stream_reader_shirt(struct hb_stream_reader *s)
 {
 	struct hb_shirt shirt;
 
@@ -316,203 +316,142 @@ struct hb_hbr *hb_hbr_parse(const char *path)
 			&hbr->player_list);
 	if (hbr->version < 12)
 		return hbr;
-	hbr->red_shirt = hb_stream_reader_team_colors(s);
-	hbr->blue_shirt = hb_stream_reader_team_colors(s);
+	hbr->red_shirt = hb_stream_reader_shirt(s);
+	hbr->blue_shirt = hb_stream_reader_shirt(s);
 
 	return hbr;
 }
 
-static struct hb_action_generic *hb_stream_reader_action_player_join(struct hb_stream_reader *s)
+static void parse_event_player_join(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_player_join *act = malloc(sizeof(*act));
-	act->id = hb_stream_reader_uint32(s);
-	hb_stream_reader_string_ascii_auto(s, act->name);
-	act->is_admin = hb_stream_reader_bool(s);
-	hb_stream_reader_string_ascii_auto(s, act->country);
-	return (void *)act;
+	ev->player_join.id = hb_stream_reader_uint32(s);
+	hb_stream_reader_string_ascii_auto(s, ev->player_join.name);
+	ev->player_join.is_admin = hb_stream_reader_bool(s);
+	hb_stream_reader_string_ascii_auto(s, ev->player_join.country);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_player_leave(struct hb_stream_reader *s)
+static void parse_event_player_leave(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_player_leave *act = malloc(sizeof(*act));
-	act->id = hb_stream_reader_uint16(s);
-	act->kicked = hb_stream_reader_bool(s);
-	act->reason[0] = '\0';
-	if (act->kicked) hb_stream_reader_string_ascii_auto(s, act->reason);
-	act->ban = hb_stream_reader_bool(s);
-	return (void *)act;
+	ev->player_leave.id = hb_stream_reader_uint16(s);
+	ev->player_leave.kicked = hb_stream_reader_bool(s);
+	ev->player_leave.reason[0] = '\0';
+	if (ev->player_leave.kicked) hb_stream_reader_string_ascii_auto(s, ev->player_leave.reason);
+	ev->player_leave.ban = hb_stream_reader_bool(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_player_chat(struct hb_stream_reader *s)
+static void parse_event_player_chat(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_player_chat *act = malloc(sizeof(*act));
-	hb_stream_reader_string_ascii_auto(s, act->message);
-	return (void *)act;
+	hb_stream_reader_string_ascii_auto(s, ev->player_chat.message);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_logic_update(__attribute((unused)) struct hb_stream_reader *s)
+static void parse_event_set_player_input(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_logic_update *act = malloc(sizeof(*act));
-	return (void *)act;
+	ev->set_player_input.input = hb_stream_reader_uint8(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_start_match(__attribute((unused)) struct hb_stream_reader *s)
+static void parse_event_set_player_team(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_start_match *act = malloc(sizeof(*act));
-	return (void *)act;
+	ev->set_player_team.id = hb_stream_reader_uint32(s);
+	ev->set_player_team.team = hb_stream_reader_team(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_stop_match(__attribute((unused)) struct hb_stream_reader *s)
+static void parse_event_set_teams_lock(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_stop_match *act = malloc(sizeof(*act));
-	return (void *)act;
+	ev->set_teams_lock.teams_lock = hb_stream_reader_bool(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_set_player_input(struct hb_stream_reader *s)
+static void parse_event_set_game_setting(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_set_player_input *act = malloc(sizeof(*act));
-	act->input = hb_stream_reader_uint8(s);
-	return (void *)act;
+	ev->set_game_setting.setting_id = hb_stream_reader_uint8(s);
+	ev->set_game_setting.setting_value = hb_stream_reader_uint32(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_set_player_team(struct hb_stream_reader *s)
+static void parse_event_set_player_avatar(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_set_player_team *act = malloc(sizeof(*act));
-	act->id = hb_stream_reader_uint32(s);
-	act->team = hb_stream_reader_team(s);
-	return (void *)act;
+	hb_stream_reader_string_ascii_auto(s, ev->set_player_avatar.avatar);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_set_teams_lock(struct hb_stream_reader *s)
+static void parse_event_set_player_admin(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_set_teams_lock *act = malloc(sizeof(*act));
-	act->teams_lock = hb_stream_reader_bool(s);
-	return (void *)act;
+	ev->set_player_admin.id = hb_stream_reader_uint32(s);
+	ev->set_player_admin.is_admin = hb_stream_reader_bool(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_set_game_setting(struct hb_stream_reader *s)
+static void parse_event_set_stadium(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_set_game_setting *act = malloc(sizeof(*act));
-	act->setting_id = hb_stream_reader_uint8(s);
-	act->setting_value = hb_stream_reader_uint32(s);
-	return (void *)act;
-}
-
-static struct hb_action_generic *hb_stream_reader_action_set_player_avatar(struct hb_stream_reader *s)
-{
-	struct hb_action_set_player_avatar *act = malloc(sizeof(*act));
-	hb_stream_reader_string_ascii_auto(s, act->avatar);
-	return (void *)act;
-}
-
-static struct hb_action_generic *hb_stream_reader_action_set_player_desync(__attribute((unused)) struct hb_stream_reader *s)
-{
-	struct hb_action_set_player_desync *act = malloc(sizeof(*act));
-	return (void *)act;
-}
-
-static struct hb_action_generic *hb_stream_reader_action_set_player_admin(struct hb_stream_reader *s)
-{
-	struct hb_action_set_player_admin *act = malloc(sizeof(*act));
-	act->id = hb_stream_reader_uint32(s);
-	act->is_admin = hb_stream_reader_bool(s);
-	return (void *)act;
-}
-
-static struct hb_action_generic *hb_stream_reader_action_set_stadium(struct hb_stream_reader *s)
-{
-	struct hb_action_set_stadium *act = malloc(sizeof(*act));
 	uint32_t chunk_size = hb_stream_reader_uint32(s);
 	struct hb_stream_reader *stadium_stream = hb_stream_reader_slice(s, chunk_size);
 	hb_stream_reader_inflate(stadium_stream, true);
-	hb_stream_reader_stadium(stadium_stream, &act->default_stadium, &act->stadium);
+	hb_stream_reader_stadium(stadium_stream, &ev->set_stadium.default_stadium, &ev->set_stadium.stadium);
 	hb_stream_reader_free(stadium_stream);
-	return (void *)act;
 }
 
-static struct hb_action_generic *hb_stream_reader_action_pause_resume_game(struct hb_stream_reader *s)
+static void parse_event_pause_resume_game(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_pause_resume_game *act = malloc(sizeof(*act));
-	act->paused = hb_stream_reader_bool(s);
-	return (void *)act;
+	ev->pause_resume_game.paused = hb_stream_reader_bool(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_ping_update(struct hb_stream_reader *s)
+static void parse_event_ping_update(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_ping_update *act = malloc(sizeof(*act));
-	act->ping_count = hb_stream_reader_uint8(s);
-	for (size_t i = 0; i < act->ping_count; ++i)
-		act->pings[i] = ((uint32_t)hb_stream_reader_uint8(s)) * 4;
-	return (void *)act;
+	ev->ping_update.ping_count = hb_stream_reader_uint8(s);
+	for (size_t i = 0; i < ev->ping_update.ping_count; ++i)
+		ev->ping_update.pings[i] = ((uint32_t)hb_stream_reader_uint8(s)) * 4;
 }
 
-static struct hb_action_generic *hb_stream_reader_action_set_player_handicap(struct hb_stream_reader *s)
+static void parse_event_set_player_handicap(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_set_player_handicap *act = malloc(sizeof(*act));
-	act->handicap = hb_stream_reader_uint16(s);
-	return (void *)act;
+	ev->set_player_handicap.handicap = hb_stream_reader_uint16(s);
 }
 
-static struct hb_action_generic *hb_stream_reader_action_set_team_colors(struct hb_stream_reader *s)
+static void parse_event_set_team_shirt(struct hb_stream_reader *s, struct hb_event *ev)
 {
-	struct hb_action_set_team_colors *act = malloc(sizeof(*act));
-	act->team = hb_stream_reader_team(s);
-	act->num_stripes = hb_stream_reader_uint8(s);
-	assert(act->num_stripes <= 3 && act->num_stripes >= 0);
-	for (size_t i = 0; i < act->num_stripes; ++i)
-		act->stripes[i] = hb_stream_reader_uint32(s);
-	act->angle = hb_stream_reader_uint16(s);
-	act->avatar_color = hb_stream_reader_uint32(s);
-	return (void *)act;
+	ev->set_team_shirt.team = hb_stream_reader_team(s);
+	ev->set_team_shirt.shirt.num_colors = (size_t) hb_stream_reader_uint8(s);
+	assert(ev->set_team_shirt.shirt.num_colors <= 3 && ev->set_team_shirt.shirt.num_colors > 0);
+	for (size_t i = 0; i < ev->set_team_shirt.shirt.num_colors; ++i)
+		ev->set_team_shirt.shirt.colors[i] = hb_stream_reader_uint32(s);
+	ev->set_team_shirt.shirt.angle = (double) hb_stream_reader_uint16(s);
+	ev->set_team_shirt.shirt.avatar_color = hb_stream_reader_uint32(s);
 }
 
-struct hb_action_generic *hb_hbr_next_action(struct hb_hbr *hbr)
+int hb_hbr_next_event(struct hb_hbr *hbr, struct hb_event *ev)
 {
 	struct hb_stream_reader *s = hbr->stream;
-	if (hbr->stream->offset >= hbr->stream->len)
-		return NULL;
-	bool is_new_frame = hb_stream_reader_bool(s);
-	if (is_new_frame) hbr->current_frame += hb_stream_reader_uint32(s);
 
-	struct hb_action_generic *act;
-	uint32_t by_player = hb_stream_reader_uint32(s);
-	uint8_t action_id = hb_stream_reader_uint8(s);
+	if (s->offset >= s->len) return 0;
+	if (hb_stream_reader_bool(s)) hbr->current_frame += hb_stream_reader_uint32(s);
 
-	switch (action_id) {
-	case HB_REPLAY_ACTION_PLAYER_JOIN: act = hb_stream_reader_action_player_join(s); break;
-	case HB_REPLAY_ACTION_PLAYER_LEAVE: act = hb_stream_reader_action_player_leave(s); break;
-	case HB_REPLAY_ACTION_PLAYER_CHAT: act = hb_stream_reader_action_player_chat(s); break;
-	case HB_REPLAY_ACTION_LOGIC_UPDATE: act = hb_stream_reader_action_logic_update(s); break;
-	case HB_REPLAY_ACTION_START_MATCH: act = hb_stream_reader_action_start_match(s); break;
-	case HB_REPLAY_ACTION_STOP_MATCH: act = hb_stream_reader_action_stop_match(s); break;
-	case HB_REPLAY_ACTION_SET_PLAYER_INPUT: act = hb_stream_reader_action_set_player_input(s); break;
-	case HB_REPLAY_ACTION_SET_PLAYER_TEAM: act = hb_stream_reader_action_set_player_team(s); break;
-	case HB_REPLAY_ACTION_SET_TEAMS_LOCK: act = hb_stream_reader_action_set_teams_lock(s); break;
-	case HB_REPLAY_ACTION_SET_GAME_SETTING: act = hb_stream_reader_action_set_game_setting(s); break;
-	case HB_REPLAY_ACTION_SET_PLAYER_AVATAR: act = hb_stream_reader_action_set_player_avatar(s); break;
-	case HB_REPLAY_ACTION_SET_PLAYER_DESYNC: act = hb_stream_reader_action_set_player_desync(s); break;
-	case HB_REPLAY_ACTION_SET_PLAYER_ADMIN: act = hb_stream_reader_action_set_player_admin(s); break;
-	case HB_REPLAY_ACTION_SET_STADIUM: act = hb_stream_reader_action_set_stadium(s); break;
-	case HB_REPLAY_ACTION_PAUSE_RESUME_GAME: act = hb_stream_reader_action_pause_resume_game(s); break;
-	case HB_REPLAY_ACTION_PING_UPDATE: act = hb_stream_reader_action_ping_update(s); break;
-	case HB_REPLAY_ACTION_SET_PLAYER_HANDICAP: act = hb_stream_reader_action_set_player_handicap(s); break;
-	case HB_REPLAY_ACTION_SET_TEAM_COLORS: act = hb_stream_reader_action_set_team_colors(s); break;
-	default: return NULL;
+	ev->by_player = hb_stream_reader_uint32(s);
+	ev->type = hb_stream_reader_uint8(s);
+
+	switch (ev->type) {
+	case HB_EVENT_PLAYER_JOIN: parse_event_player_join(s, ev); break;
+	case HB_EVENT_PLAYER_LEAVE: parse_event_player_leave(s, ev); break;
+	case HB_EVENT_PLAYER_CHAT: parse_event_player_chat(s, ev); break;
+	case HB_EVENT_SET_PLAYER_INPUT: parse_event_set_player_input(s, ev); break;
+	case HB_EVENT_SET_PLAYER_TEAM: parse_event_set_player_team(s, ev); break;
+	case HB_EVENT_SET_TEAMS_LOCK: parse_event_set_teams_lock(s, ev); break;
+	case HB_EVENT_SET_GAME_SETTING: parse_event_set_game_setting(s, ev); break;
+	case HB_EVENT_SET_PLAYER_AVATAR: parse_event_set_player_avatar(s, ev); break;
+	case HB_EVENT_SET_PLAYER_ADMIN: parse_event_set_player_admin(s, ev); break;
+	case HB_EVENT_SET_STADIUM: parse_event_set_stadium(s, ev); break;
+	case HB_EVENT_PAUSE_RESUME_GAME: parse_event_pause_resume_game(s, ev); break;
+	case HB_EVENT_PING_UPDATE: parse_event_ping_update(s, ev); break;
+	case HB_EVENT_SET_PLAYER_HANDICAP: parse_event_set_player_handicap(s, ev); break;
+	case HB_EVENT_SET_TEAM_SHIRT: parse_event_set_team_shirt(s, ev); break;
+
+	case HB_EVENT_SET_PLAYER_DESYNC: /* No data */ break;
+	case HB_EVENT_LOGIC_UPDATE: /* No data */ break;
+	case HB_EVENT_START_MATCH: /* No data */ break;
+	case HB_EVENT_STOP_MATCH: /* No data */ break;
+	default: return 0;
 	}
 
-	act->by_player = by_player;
-	act->type = action_id;
-
-	return act;
+	return 1;
 }
 
 void hb_hbr_free(struct hb_hbr *hbr)
 {
 	hb_stream_reader_free(hbr->stream);
 	free(hbr);
-}
-
-void hb_action_free(struct hb_action_generic *action)
-{
-	free(action);
 }

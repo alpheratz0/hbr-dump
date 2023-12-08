@@ -149,8 +149,13 @@ main(int argc, char **argv)
 	if (mode == DumpMessages) {
 		printf("Room name: %s\n", hbr->room_name);
 		printf("Stadium: %s.\n", hbr->default_stadium != NULL ? hbr->default_stadium : hbr->stadium.name);
+		printf("Player list: [\n");
 		for (size_t i = 0; i < hbr->player_list.length; ++i)
-			printf("%s was in the room.\n", hbr->player_list.players[i].name);
+			printf("	{ name=%s country=%s avatar=%s },\n",
+					hbr->player_list.players[i].name,
+					hbr->player_list.players[i].country,
+					hbr->player_list.players[i].avatar);
+		printf("]\n");
 	}
 
 	while (hbr_next_event(hbr, &ev) > 0) {

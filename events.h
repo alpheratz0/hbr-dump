@@ -58,5 +58,5 @@ struct hb_event {
 		struct hb_event_ping_update { uint8_t ping_count; uint32_t pings[255]; } ping_update;
 		struct hb_event_set_player_handicap { uint16_t handicap; } set_player_handicap;
 		struct hb_event_set_team_colors { enum hb_team team; struct hb_shirt shirt; } set_team_colors;
-	} ev;
+	};
 }

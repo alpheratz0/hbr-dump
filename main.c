@@ -147,6 +147,7 @@ main(int argc, char **argv)
 	}
 
 	if (mode == DumpMessages) {
+		printf("Room name: %s\n", hbr->room_name);
 		printf("Stadium: %s.\n", hbr->default_stadium != NULL ? hbr->default_stadium : hbr->stadium.name);
 		for (size_t i = 0; i < hbr->player_list.length; ++i)
 			printf("%s was in the room.\n", hbr->player_list.players[i].name);

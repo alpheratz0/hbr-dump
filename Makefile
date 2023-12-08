@@ -1,6 +1,10 @@
 .PHONY: all clean
 
+CC=gcc
 CFLAGS=-Wall -Wextra -O2
+BIN=hbrdump
+RM=/bin/rm
+LDFLAGS=-lz -lhb -ljq -lm
 
 OBJ=\
 	hbr.o \
@@ -8,10 +12,10 @@ OBJ=\
 	player.o \
 	main.o
 
-all: hbrdump
+all: $(BIN)
 
-hbrdump: $(OBJ)
-	cc *.o -o hbrdump -lz -lhb -ljq -lm -O2
+$(BIN): $(OBJ)
+	$(CC) $^ -o $(BIN) $(LDFLAGS)
 
 clean:
-	rm -f *.o hbrdump
+	$(RM) -f $(OBJ) $(BIN)

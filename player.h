@@ -38,13 +38,9 @@ struct hb_player_list
 	size_t length;
 };
 
-extern void hb_player_list_add(struct hb_player_list *player_list,
-		uint32_t id, char *name, bool is_admin, char *country);
-
-extern void hb_player_list_remove(struct hb_player_list *player_list, uint32_t id);
-
-extern int hb_player_list_index_of(struct hb_player_list *player_list, uint32_t id);
-
-extern bool hb_player_list_contains(struct hb_player_list *player_list, uint32_t id);
-
-extern struct hb_player hb_player_list_get(struct hb_player_list *player_list, uint32_t id);
+void hb_player_list_add(struct hb_player_list *list, uint32_t id,
+		char *name, bool is_admin, char *country);
+void hb_player_list_remove(struct hb_player_list *list, uint32_t id);
+int hb_player_list_index_of(struct hb_player_list *list, uint32_t id);
+bool hb_player_list_contains(struct hb_player_list *list, uint32_t id);
+struct hb_player hb_player_list_get(struct hb_player_list *list, uint32_t id);

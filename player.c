@@ -19,46 +19,45 @@
 #include <stdint.h>
 #include "player.h"
 
-extern void hb_player_list_add(struct hb_player_list *player_list,
-		uint32_t id, char *name, bool is_admin, char *country)
+void hb_player_list_add(struct hb_player_list *list, uint32_t id,
+		char *name, bool is_admin, char *country)
 {
 	struct hb_player player = {0};
 	player.id = id;
 	strcpy(player.name, name);
 	player.is_admin = is_admin;
 	strcpy(player.country, country);
-	player_list->players[player_list->length++] = player;
+	list->players[list->length++] = player;
 }
 
-extern void hb_player_list_remove(struct hb_player_list *player_list, uint32_t id)
+void hb_player_list_remove(struct hb_player_list *list, uint32_t id)
 {
-	for (size_t i = 0; i < player_list->length; ++i) {
-		if (player_list->players[i].id == id) {
-			for (size_t j = i+1; j < player_list->length; ++j)
-				player_list->players[j-1] = player_list->players[j];
-			player_list->length -= 1;
+	for (size_t i = 0; i < list->length; ++i) {
+		if (list->players[i].id == id) {
+			for (size_t j = i+1; j < list->length; ++j)
+				list->players[j-1] = list->players[j];
+			list->length -= 1;
 			break;
 		}
 	}
 }
 
-extern int hb_player_list_index_of(struct hb_player_list *player_list, uint32_t id)
+int hb_player_list_index_of(struct hb_player_list *list, uint32_t id)
 {
-	for (size_t i = 0; i < player_list->length; ++i)
-		if (player_list->players[i].id == id)
+	for (size_t i = 0; i < list->length; ++i)
+		if (list->players[i].id == id)
 			return (int) i;
 	return -1;
 }
 
-extern bool hb_player_list_contains(struct hb_player_list *player_list, uint32_t id)
+bool hb_player_list_contains(struct hb_player_list *list, uint32_t id)
 {
-	return hb_player_list_index_of(player_list, id) != -1;
+	return hb_player_list_index_of(list, id) != -1;
 }
 
-extern struct hb_player hb_player_list_get(struct hb_player_list *player_list, uint32_t id)
+struct hb_player hb_player_list_get(struct hb_player_list *list, uint32_t id)
 {
-	int index = hb_player_list_index_of(player_list, id);
+	int index = hb_player_list_index_of(list, id);
 	if (index == -1) return ((struct hb_player) {0});
-	return player_list->players[index];
+	return list->players[index];
 }
-

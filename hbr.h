@@ -20,6 +20,7 @@
 #include <hb/team.h>
 #include <stdint.h>
 
+#include "player.h"
 #include "stream_reader.h"
 #include "events.h"
 
@@ -27,29 +28,8 @@
 #define HBR_MIN_VERSION (7)
 #define HBR_MAX_VERSION (12)
 
-#define HB_PLAYER_LIST_MAX_PLAYERS (60)
-
-struct hb_player {
-	uint32_t id;
-	char name[128];
-	bool is_admin;
-	enum hb_team team;
-	uint8_t number;
-	char avatar[10];
-	uint32_t input;
-	uint8_t kicking;
-	uint8_t desynced;
-	char country[10];
-	uint16_t handicap;
-	uint32_t disc_id;
-};
-
-struct hb_player_list {
-	struct hb_player players[HB_PLAYER_LIST_MAX_PLAYERS];
-	size_t length;
-};
-
-struct hb_hbr {
+struct hbr
+{
 	uint32_t version;
 	uint32_t magic;
 	uint32_t total_frames;
@@ -75,6 +55,6 @@ struct hb_hbr {
 	struct hb_stream_reader *stream;
 };
 
-struct hb_hbr *hb_hbr_parse(const char *path);
-int hb_hbr_next_event(struct hb_hbr *hbr, struct hb_event *ev);
-void hb_hbr_free(struct hb_hbr *hbr);
+struct hbr *hbr_parse(const char *path);
+int hbr_next_event(struct hbr *hbr, struct hb_event *ev);
+void hbr_free(struct hbr *hbr);

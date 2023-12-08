@@ -28,6 +28,7 @@
 #include <hb/disc.h>
 #include <hb/shirt.h>
 #include <hb/stadium.h>
+#include "player.h"
 #include "stream_reader.h"
 #include "events.h"
 #include "hbr.h"
@@ -272,9 +273,9 @@ static void hb_stream_reader_stadium(struct hb_stream_reader *s,
 	ball_physics->c_group |= HB_COLLISION_KICK|HB_COLLISION_SCORE|HB_COLLISION_BALL;
 }
 
-struct hb_hbr *hb_hbr_parse(const char *path)
+struct hbr *hbr_parse(const char *path)
 {
-	struct hb_hbr *hbr = calloc(1, sizeof(*hbr));
+	struct hbr *hbr = calloc(1, sizeof(*hbr));
 	struct hb_stream_reader *s = hbr->stream = hb_stream_reader_from_file(path);
 
 	hbr->version            = hb_stream_reader_uint32(s);
@@ -414,7 +415,7 @@ static void parse_event_set_team_shirt(struct hb_stream_reader *s, struct hb_eve
 	ev->set_team_shirt.shirt.avatar_color = hb_stream_reader_uint32(s);
 }
 
-int hb_hbr_next_event(struct hb_hbr *hbr, struct hb_event *ev)
+int hbr_next_event(struct hbr *hbr, struct hb_event *ev)
 {
 	struct hb_stream_reader *s = hbr->stream;
 
@@ -450,7 +451,7 @@ int hb_hbr_next_event(struct hb_hbr *hbr, struct hb_event *ev)
 	return 1;
 }
 
-void hb_hbr_free(struct hb_hbr *hbr)
+void hbr_free(struct hbr *hbr)
 {
 	hb_stream_reader_free(hbr->stream);
 	free(hbr);

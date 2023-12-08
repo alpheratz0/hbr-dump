@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "stream_reader.h"
+#include "player.h"
 #include "events.h"
 #include "hbr.h"
 
@@ -25,57 +26,14 @@
 
 static enum { DumpMessages, DumpStadiums } mode = DumpMessages;
 
-static void hb_player_list_add(struct hb_player_list *player_list,
-		uint32_t id, char *name, bool is_admin, char *country)
-{
-	struct hb_player player = {0};
-	player.id = id;
-	strcpy(player.name, name);
-	player.is_admin = is_admin;
-	strcpy(player.country, country);
-	player_list->players[player_list->length++] = player;
-}
-
-static void hb_player_list_remove(struct hb_player_list *player_list, uint32_t id)
-{
-	for (size_t i = 0; i < player_list->length; ++i) {
-		if (player_list->players[i].id == id) {
-			for (size_t j = i+1; j < player_list->length; ++j)
-				player_list->players[j-1] = player_list->players[j];
-			player_list->length -= 1;
-			break;
-		}
-	}
-}
-
-static int hb_player_list_index_of(struct hb_player_list *player_list, uint32_t id)
-{
-	for (size_t i = 0; i < player_list->length; ++i)
-		if (player_list->players[i].id == id)
-			return (int) i;
-	return -1;
-}
-
-static bool hb_player_list_contains(struct hb_player_list *player_list, uint32_t id)
-{
-	return hb_player_list_index_of(player_list, id) != -1;
-}
-
-static struct hb_player hb_player_list_get(struct hb_player_list *player_list, uint32_t id)
-{
-	int index = hb_player_list_index_of(player_list, id);
-	if (index == -1) return ((struct hb_player) {0});
-	return player_list->players[index];
-}
-
-static void on_player_join(struct hb_hbr *hbr, struct hb_event_player_join *ev)
+static void on_player_join(struct hbr *hbr, struct hb_event_player_join *ev)
 {
 	if (mode == DumpMessages)
 		printf("%s joined the room!\n", ev->name);
 	hb_player_list_add(&hbr->player_list, ev->id, ev->name, ev->is_admin, ev->country);
 }
 
-static void on_player_leave(struct hb_hbr *hbr, uint32_t by_player, struct hb_event_player_leave *ev)
+static void on_player_leave(struct hbr *hbr, uint32_t by_player, struct hb_event_player_leave *ev)
 {
 	if (mode == DumpMessages) {
 		if (!hb_player_list_contains(&hbr->player_list, ev->id)) return;
@@ -91,7 +49,7 @@ static void on_player_leave(struct hb_hbr *hbr, uint32_t by_player, struct hb_ev
 	hb_player_list_remove(&hbr->player_list, ev->id);
 }
 
-static void on_player_chat(struct hb_hbr *hbr, uint32_t by_player, struct hb_event_player_chat *ev)
+static void on_player_chat(struct hbr *hbr, uint32_t by_player, struct hb_event_player_chat *ev)
 {
 	if (mode != DumpMessages) return;
 	if (!hb_player_list_contains(&hbr->player_list, by_player)) return;
@@ -99,7 +57,7 @@ static void on_player_chat(struct hb_hbr *hbr, uint32_t by_player, struct hb_eve
 	printf("%s: %s\n", sender.name, ev->message);
 }
 
-static void on_match_start(struct hb_hbr *hbr, uint32_t by_player)
+static void on_match_start(struct hbr *hbr, uint32_t by_player)
 {
 	if (mode != DumpMessages) return;
 	if (!hb_player_list_contains(&hbr->player_list, by_player)) return;
@@ -107,7 +65,7 @@ static void on_match_start(struct hb_hbr *hbr, uint32_t by_player)
 	printf("Game started by %s!\n", player.name);
 }
 
-static void on_match_stop(struct hb_hbr *hbr, uint32_t by_player)
+static void on_match_stop(struct hbr *hbr, uint32_t by_player)
 {
 	if (mode != DumpMessages) return;
 	if (!hb_player_list_contains(&hbr->player_list, by_player)) return;
@@ -115,7 +73,7 @@ static void on_match_stop(struct hb_hbr *hbr, uint32_t by_player)
 	printf("Game stopped by %s!\n", player.name);
 }
 
-static void on_player_admin_change(struct hb_hbr *hbr, uint32_t by_player, struct hb_event_set_player_admin *ev)
+static void on_player_admin_change(struct hbr *hbr, uint32_t by_player, struct hb_event_set_player_admin *ev)
 {
 	if (mode != DumpMessages) return;
 	if (!hb_player_list_contains(&hbr->player_list, ev->id)) return;
@@ -125,7 +83,7 @@ static void on_player_admin_change(struct hb_hbr *hbr, uint32_t by_player, struc
 	else printf("%s's admin rights were taken away by %s.\n", player.name, by.name);
 }
 
-static void on_player_team_change(struct hb_hbr *hbr, uint32_t by_player, struct hb_event_set_player_team *ev)
+static void on_player_team_change(struct hbr *hbr, uint32_t by_player, struct hb_event_set_player_team *ev)
 {
 	if (mode != DumpMessages) return;
 	if (!hb_player_list_contains(&hbr->player_list, ev->id)) return;
@@ -135,7 +93,7 @@ static void on_player_team_change(struct hb_hbr *hbr, uint32_t by_player, struct
 	printf("%s was moved to %s by %s\n", player.name, teams[ev->team], by.name);
 }
 
-static void on_game_paused(struct hb_hbr *hbr, uint32_t by_player, struct hb_event_pause_resume_game *ev)
+static void on_game_paused(struct hbr *hbr, uint32_t by_player, struct hb_event_pause_resume_game *ev)
 {
 	if (mode != DumpMessages) return;
 	if (!hb_player_list_contains(&hbr->player_list, by_player)) return;
@@ -157,7 +115,7 @@ static void save_stadium(struct hb_stadium *stadium)
 	free(hbs_data);
 }
 
-static void on_stadium_change(struct hb_hbr *hbr, uint32_t by_player, struct hb_event_set_stadium *ev)
+static void on_stadium_change(struct hbr *hbr, uint32_t by_player, struct hb_event_set_stadium *ev)
 {
 	struct hb_player player = hb_player_list_get(&hbr->player_list, by_player);
 	if (!hb_player_list_contains(&hbr->player_list, by_player)) return;
@@ -179,7 +137,7 @@ main(int argc, char **argv)
 	else if (!strcmp(argv[1], "-stadiums")) mode = DumpStadiums;
 	else { printf("Invalid option!\n"); return 1; }
 
-	struct hb_hbr *hbr = hb_hbr_parse(argv[2]);
+	struct hbr *hbr = hbr_parse(argv[2]);
 	struct hb_event ev = {0};
 
 	srand((unsigned ) getpid());
@@ -193,7 +151,7 @@ main(int argc, char **argv)
 			printf("%s was in the room.\n", hbr->player_list.players[i].name);
 	}
 
-	while (hb_hbr_next_event(hbr, &ev) > 0) {
+	while (hbr_next_event(hbr, &ev) > 0) {
 		switch (ev.type) {
 		case HB_EVENT_PLAYER_JOIN: on_player_join(hbr, &ev.player_join); break;
 		case HB_EVENT_PLAYER_LEAVE: on_player_leave(hbr, ev.by_player, &ev.player_leave); break;
@@ -207,7 +165,7 @@ main(int argc, char **argv)
 		}
 	}
 
-	hb_hbr_free(hbr);
+	hbr_free(hbr);
 
 	return 0;
 }

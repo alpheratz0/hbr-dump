@@ -5,6 +5,7 @@ CFLAGS=-Wall -Wextra -O2
 OBJ=\
 	hbr.o \
 	stream_reader.o \
+	player.o \
 	main.o
 
 all: hbrdump

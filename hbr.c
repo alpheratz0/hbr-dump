@@ -43,14 +43,6 @@ static enum hb_team hb_stream_reader_team(struct hb_stream_reader *s)
 	}
 }
 
-static uint32_t hb_stream_reader_color(struct hb_stream_reader *s)
-{
-	uint32_t color = hb_stream_reader_uint32(s);
-	if (color == 0xffffffff) color = 0x00000000;
-	else color |= 0xfful << 24;
-	return color;
-}
-
 static double hb_stream_reader_curve(struct hb_stream_reader *s)
 {
 	double curve_f = hb_stream_reader_double(s);
@@ -70,7 +62,7 @@ static void hb_stream_reader_disc(struct hb_stream_reader *s,
 	disc->b_coef             = hb_stream_reader_double(s);
 	disc->inv_mass           = hb_stream_reader_double(s);
 	disc->damping            = hb_stream_reader_double(s);
-	disc->color              = hb_stream_reader_color(s);
+	disc->color              = hb_stream_reader_uint32(s);
 	disc->c_mask             = hb_stream_reader_uint32(s);
 	disc->c_group            = hb_stream_reader_uint32(s);
 }
@@ -106,7 +98,7 @@ static void hb_stream_reader_segment(struct hb_stream_reader *s,
 	segment->c_group         = hb_stream_reader_uint32(s);
 	segment->curve           = hb_stream_reader_curve(s);
 	segment->vis             = hb_stream_reader_bool(s);
-	segment->color           = hb_stream_reader_color(s);
+	segment->color           = hb_stream_reader_uint32(s);
 }
 
 static void hb_stream_reader_vertex(struct hb_stream_reader *s,
@@ -128,7 +120,7 @@ static void hb_stream_reader_bg(struct hb_stream_reader *s,
 	bg->kick_off_radius      = hb_stream_reader_double(s);
 	bg->corner_radius        = hb_stream_reader_double(s);
 	bg->goal_line            = hb_stream_reader_double(s);
-	bg->color                = hb_stream_reader_color(s);
+	bg->color                = hb_stream_reader_uint32(s);
 }
 
 static void hb_stream_reader_player_physics(struct hb_stream_reader *s,

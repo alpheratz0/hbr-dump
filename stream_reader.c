@@ -125,6 +125,7 @@ void hb_stream_reader_inflate(struct hb_stream_reader *s, bool raw)
 
 	memcpy(s->data, inflated, s->len);
 	inflateEnd(&strm);
+	free(inflated);
 }
 
 void hb_stream_reader_free(struct hb_stream_reader *s)
